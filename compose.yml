@@ -1,0 +1,24 @@
+services:
+  dockge:
+    image: louislam/dockge:latest
+    restart: unless-stopped
+    container_name: dockge
+    hostname: dockge-server
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dockge.rule=Host(`${CNAME}.${HOST_NAME}`)
+      - traefik.http.routers.dockge.entrypoints=web, websecure
+      - traefik.http.routers.dockge.tls=true
+      - traefik.http.routers.dockge.tls.certresolver=letsencrypt
+      - traefik.http.services.dockge.loadBalancer.server.port=5001
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $HOME/.docker/stacks:/app/data/stacks
+    environment:
+      - DOCKGE_STACKS_DIR=${DOCKGE_STACKS_DIR}
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
